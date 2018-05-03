@@ -23,13 +23,43 @@ class GenerateCommand extends Command
     protected $description = 'Generate';
 
     /**
+     * The projects config.
+     *
+     * @var array
+     */
+    private $config;
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param array $config
+     */
+    public function setConfig(array $config): void
+    {
+        $this->config = $config;
+    }
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->setConfig(config('projects'));
+    }
+
+    /**
      * Execute the console command.
      *
      * @return void
      */
     public function handle(): void
     {
-        Storage::append('dist/test.php', 'lal');
+        $option = $this->menu('Chose a project', array_keys($this->config))->open();
     }
 
     /**
