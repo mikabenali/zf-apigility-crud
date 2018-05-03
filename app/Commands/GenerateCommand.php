@@ -30,6 +30,11 @@ class GenerateCommand extends Command
     private $config;
 
     /**
+     * Module path
+     */
+    const MODULE_PATH = '/module';
+
+    /**
      * @return array
      */
     public function getConfig(): array
@@ -59,7 +64,31 @@ class GenerateCommand extends Command
      */
     public function handle(): void
     {
-        $option = $this->menu('Chose a project', array_keys($this->config))->open();
+        // Projects menu
+        if (count($this->config) < 1) {
+            $this->task("No projects found", function () { return false;});
+            return;
+        }
+        $optionProject = $this->menu('Chose a project', $this->config)->open();
+
+        // Modules menu
+        $modules = $this->getModules($this->config[$optionProject]);
+        if (count($modules) < 1) {
+            $this->task("No modules found", function () { return false;});
+            return;
+        }
+        $optionModule = $this->menu('Chose a module from your projects', $modules)->open();
+    }
+
+    private function getModules(string $projectPath): array {
+        if (!$modules = scandir($projectPath . $this::MODULE_PATH)) {
+           return false;
+        }
+
+        return array_filter($modules, function($file) {
+            //return is_dir($file);
+            return true;
+        });
     }
 
     /**

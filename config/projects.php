@@ -10,5 +10,5 @@
 |--------------------------------------------------------------------------
 */
 return [
-    'adspace-api' => '/home/mika/projects/perso/zf-apigility-crud',
+    '/home/mika/projects/work/francetvpub/adspace-api',
 ];
