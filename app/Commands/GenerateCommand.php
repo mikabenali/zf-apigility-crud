@@ -3,9 +3,8 @@
 namespace App\Commands;
 
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Storage;
 use LaravelZero\Framework\Commands\Command;
-use Nette\PhpGenerator\ClassType;
+use App\Services\GeneratorService;
 
 class GenerateCommand extends Command
 {
@@ -30,6 +29,25 @@ class GenerateCommand extends Command
      */
     private $config;
 
+    /* @var GeneratorService */
+    private $generatorService;
+
+    /**
+     * @return GeneratorService
+     */
+    public function getGeneratorService(): GeneratorService
+    {
+        return $this->generatorService;
+    }
+
+    /**
+     * @param GeneratorService $generatorService
+     */
+    public function setGeneratorService(GeneratorService $generatorService): void
+    {
+        $this->generatorService = $generatorService;
+    }
+
 
     /**
      * @return array
@@ -47,10 +65,11 @@ class GenerateCommand extends Command
         $this->config = $config;
     }
 
-    public function __construct()
+    public function __construct(GeneratorService $generatorService)
     {
         parent::__construct();
 
+        $this->setGeneratorService($generatorService);
         $this->setConfig(config('config'));
     }
 
@@ -69,66 +88,14 @@ class GenerateCommand extends Command
         $optionProject = $this->menu('Chose a project', $this->config['projects'])->open();
 
         // Modules menu
-        $modules = $this->getModules($this->config['projects'][$optionProject]);
+        $modules = $this->generatorService->getModules($this->config['projects'][$optionProject]);
         if (count($modules) < 1) {
             $this->task("No modules found", function () { return false;});
             return;
         }
         $optionModule = $this->menu('Chose a module from your projects', $modules)->open();
 
-        $this->createClassFiles('Purchase');
-    }
-
-    private function generatePhpClass(string $classType): string {
-        $class = new ClassType('lala');
-
-        $class->setAbstract()
-            ->setFinal()
-            ->setExtends('ParentClass')
-            ->addImplement('Countable')
-            ->addTrait('Nette\SmartObject')
-            ->addComment("Description of class.\nSecond line\n")
-            ->addComment('@property-read Nette\Forms\Form $form');
-
-        return (string) $class;
-    }
-
-    /**
-     * Create class files
-     *
-     * @param string $name
-     */
-    private function createClassFiles(string $name): void {
-        foreach ($this->config['classSuffix'] as $type) {
-            $fileName = $name . $type;
-
-            if(Storage::put($this->config['outClassPath'] . $fileName . '.php', $this->generatePhpClass($type))) {
-                $this->task($fileName . ' created.', function () { return true;});
-            } else {
-                $this->task($fileName . ' not created.', function () { return false;});
-            }
-        }
-    }
-
-    /**
-     * Get Project modules
-     *
-     * @param string $projectPath
-     * @return array
-     */
-    private function getModules(string $projectPath): array {
-        $modules = [];
-
-        foreach (array_diff(scandir(
-            $projectPath .
-            $this->config['modulePath'])
-            , array('..', '.')) as $folder) {
-           if (is_dir($folder)); {
-               $modules[] = $folder;
-            }
-        }
-
-        return $modules;
+        $this->generatorService->createClassFiles('Purchase');
     }
 
     /**

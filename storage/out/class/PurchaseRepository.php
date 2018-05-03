@@ -4,7 +4,7 @@
  *
  * @property-read Nette\Forms\Form $form
  */
-abstract final class PurchaseRepository extends ParentClass implements Countable
+abstract final class lala extends ParentClass implements Countable
 {
 	use Nette\SmartObject;
 
