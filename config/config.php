@@ -10,10 +10,11 @@
 |--------------------------------------------------------------------------
 */
 return [
-    'outPath' => 'out/',
+    'outClassPath' => 'out/class/',
+    'outConfigPath' => 'out/config/',
     'modulePath' => '/module',
 
-    'filesType'=> [
+    'classSuffix'=> [
         'Entity',
         'Resource',
         'ResourceFactory',

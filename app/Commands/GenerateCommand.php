@@ -75,18 +75,20 @@ class GenerateCommand extends Command
         }
         $optionModule = $this->menu('Chose a module from your projects', $modules)->open();
 
-        $this->createFiles('Purchase');
+        $this->createClassFiles('Purchase');
 
     }
 
     /**
+     * Create class files
+     *
      * @param string $name
      */
-    private function createFiles(string $name): void {
-        foreach ($this->config['filesType'] as $type) {
+    private function createClassFiles(string $name): void {
+        foreach ($this->config['classSuffix'] as $type) {
             $fileName = $name . $type . '.php';
 
-            if(Storage::put($this->config['outPath'] . $fileName, '')) {
+            if(Storage::put($this->config['outClassPath'] . $fileName, '')) {
                 $this->task($fileName . ' created.', function () { return true;});
             } else {
                 $this->task($fileName . ' not created.', function () { return false;});
