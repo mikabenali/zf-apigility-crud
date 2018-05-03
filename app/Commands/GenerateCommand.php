@@ -5,6 +5,7 @@ namespace App\Commands;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Storage;
 use LaravelZero\Framework\Commands\Command;
+use Nette\PhpGenerator\ClassType;
 
 class GenerateCommand extends Command
 {
@@ -76,7 +77,20 @@ class GenerateCommand extends Command
         $optionModule = $this->menu('Chose a module from your projects', $modules)->open();
 
         $this->createClassFiles('Purchase');
+    }
 
+    private function generatePhpClass(string $classType): string {
+        $class = new ClassType('lala');
+
+        $class->setAbstract()
+            ->setFinal()
+            ->setExtends('ParentClass')
+            ->addImplement('Countable')
+            ->addTrait('Nette\SmartObject')
+            ->addComment("Description of class.\nSecond line\n")
+            ->addComment('@property-read Nette\Forms\Form $form');
+
+        return (string) $class;
     }
 
     /**
@@ -86,9 +100,9 @@ class GenerateCommand extends Command
      */
     private function createClassFiles(string $name): void {
         foreach ($this->config['classSuffix'] as $type) {
-            $fileName = $name . $type . '.php';
+            $fileName = $name . $type;
 
-            if(Storage::put($this->config['outClassPath'] . $fileName, '')) {
+            if(Storage::put($this->config['outClassPath'] . $fileName . '.php', $this->generatePhpClass($type))) {
                 $this->task($fileName . ' created.', function () { return true;});
             } else {
                 $this->task($fileName . ' not created.', function () { return false;});
