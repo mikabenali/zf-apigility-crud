@@ -29,10 +29,6 @@ class GenerateCommand extends Command
      */
     private $config;
 
-    /**
-     * Module path
-     */
-    const MODULE_PATH = '/module';
 
     /**
      * @return array
@@ -54,7 +50,7 @@ class GenerateCommand extends Command
     {
         parent::__construct();
 
-        $this->setConfig(config('projects'));
+        $this->setConfig(config('config'));
     }
 
     /**
@@ -69,26 +65,54 @@ class GenerateCommand extends Command
             $this->task("No projects found", function () { return false;});
             return;
         }
-        $optionProject = $this->menu('Chose a project', $this->config)->open();
+        $optionProject = $this->menu('Chose a project', $this->config['projects'])->open();
 
         // Modules menu
-        $modules = $this->getModules($this->config[$optionProject]);
+        $modules = $this->getModules($this->config['projects'][$optionProject]);
         if (count($modules) < 1) {
             $this->task("No modules found", function () { return false;});
             return;
         }
         $optionModule = $this->menu('Chose a module from your projects', $modules)->open();
+
+        $this->createFiles('Purchase');
+
     }
 
+    /**
+     * @param string $name
+     */
+    private function createFiles(string $name): void {
+        foreach ($this->config['filesType'] as $type) {
+            $fileName = $name . $type . '.php';
+
+            if(Storage::put($this->config['outPath'] . $fileName, '')) {
+                $this->task($fileName . ' created.', function () { return true;});
+            } else {
+                $this->task($fileName . ' not created.', function () { return false;});
+            }
+        }
+    }
+
+    /**
+     * Get Project modules
+     *
+     * @param string $projectPath
+     * @return array
+     */
     private function getModules(string $projectPath): array {
-        if (!$modules = scandir($projectPath . $this::MODULE_PATH)) {
-           return false;
+        $modules = [];
+
+        foreach (array_diff(scandir(
+            $projectPath .
+            $this->config['modulePath'])
+            , array('..', '.')) as $folder) {
+           if (is_dir($folder)); {
+               $modules[] = $folder;
+            }
         }
 
-        return array_filter($modules, function($file) {
-            //return is_dir($file);
-            return true;
-        });
+        return $modules;
     }
 
     /**
