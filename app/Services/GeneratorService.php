@@ -31,6 +31,8 @@ class GeneratorService
     }
 
     /**
+     * Generate PHP source class
+     *
      * @param string $classType
      * @return string
      */
